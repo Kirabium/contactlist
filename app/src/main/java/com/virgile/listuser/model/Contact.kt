@@ -2,10 +2,11 @@ package com.virgile.listuser.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 @Parcelize
 data class Contact(
-    val id: Int,
+    val id: String,
     val firstname: String,
     val lastname: String,
     val city: String,
@@ -14,7 +15,7 @@ data class Contact(
     val picture: String,
     val country: String,
     val postcode: String,
-) : Parcelable {
+) : Parcelable, Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -35,7 +36,7 @@ data class Contact(
     }
 
     override fun hashCode(): Int {
-        var result = id
+        var result = id.hashCode()
         result = 31 * result + firstname.hashCode()
         result = 31 * result + lastname.hashCode()
         result = 31 * result + city.hashCode()
@@ -46,4 +47,6 @@ data class Contact(
         result = 31 * result + postcode.hashCode()
         return result
     }
+
+
 }

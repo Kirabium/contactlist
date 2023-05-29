@@ -3,8 +3,6 @@ package com.virgile.listuser.ui.contactlist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.virgile.listuser.model.Contact
-import com.virgile.listuser.usecases.CleanContactListUseCaseImpl
-import com.virgile.listuser.usecases.DeleteContactInListUseCaseImpl
 import com.virgile.listuser.usecases.GetContactListUseCaseImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,9 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListViewModel @Inject constructor(
-    private val getContactListUseCaseImpl: GetContactListUseCaseImpl,
-    private val deleteContactInListUseCaseImpl: DeleteContactInListUseCaseImpl,
-    private val cleanContactListUseCaseImpl: CleanContactListUseCaseImpl
+    private val getContactListUseCaseImpl: GetContactListUseCaseImpl
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow<ListViewState>(ListViewState.Loading)
@@ -31,12 +27,16 @@ class ListViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> =
         _isLoading.asStateFlow() // Make loading indicator read only from outside
 
+    // Assume initially that we can load more items
+    private val _canLoadMoreItems = MutableStateFlow(true)
+    val canLoadMoreItems: StateFlow<Boolean> = _canLoadMoreItems.asStateFlow()
+
     init {
         loadContacts()
     }
 
     fun loadMoreItems() = viewModelScope.launch {
-        if (_isLoading.value) return@launch // If already loading, return early
+        if (_isLoading.value || !_canLoadMoreItems.value) return@launch // If already loading, return early
         currentPage++
         _isLoading.emit(true) // Emit loading state
         loadContacts()
@@ -50,38 +50,8 @@ class ListViewModel @Inject constructor(
             }
             .collectLatest { result ->
                 handleContactResult(result)
+                _canLoadMoreItems.emit(result.isNotEmpty())
             }
-    }
-
-    fun deleteItem(contact: Contact) {
-        viewModelScope.launch {
-            val result = deleteContactInListUseCaseImpl.invoke(contact.id)
-            if (result.isSuccess) {
-                val currentViewState = _viewState.value
-                if (currentViewState is ListViewState.Success) {
-                    _viewState.emit(currentViewState.copy(contacts = currentViewState.contacts.filter { it != contact }))
-                }
-            } else {
-                // Handle the error
-                _viewState.emit(ListViewState.Error("Failed to delete contact with id: ${contact.id}"))
-            }
-        }
-    }
-
-    fun cleanAndRefreshData() {
-        viewModelScope.launch {
-            _isLoading.emit(true) // Emit loading state
-            cleanContactListUseCaseImpl.invoke()
-                .catch { exception -> // Catch exceptions and handle it
-                    _viewState.emit(ListViewState.Error(exception.message ?: "Unknown error"))
-                    _isLoading.emit(false)
-                }
-                .collectLatest { result ->
-                    _viewState.emit(ListViewState.Success(result))
-                    currentPage = 1
-                    _isLoading.emit(false) // Emit loading complete
-                }
-        }
     }
 
     private suspend fun handleContactResult(result: List<Contact>) {
