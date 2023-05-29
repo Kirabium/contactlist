@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Contact(
-    val id: Int,
+    val id: String,
     val firstname: String,
     val lastname: String,
     val city: String,
@@ -35,7 +35,7 @@ data class Contact(
     }
 
     override fun hashCode(): Int {
-        var result = id
+        var result = id.hashCode()
         result = 31 * result + firstname.hashCode()
         result = 31 * result + lastname.hashCode()
         result = 31 * result + city.hashCode()
@@ -46,4 +46,6 @@ data class Contact(
         result = 31 * result + postcode.hashCode()
         return result
     }
+
+
 }

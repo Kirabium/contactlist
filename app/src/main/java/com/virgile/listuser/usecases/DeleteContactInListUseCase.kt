@@ -5,13 +5,13 @@ import java.lang.Exception
 import javax.inject.Inject
 
 interface DeleteContactInListUseCase {
-    suspend fun invoke(id: Int): Result<Unit>
+    suspend fun invoke(id: String): Result<Unit>
 }
 
 class DeleteContactInListUseCaseImpl @Inject constructor(
     private val contactLocalRepository: ContactLocalRepository
 ) : DeleteContactInListUseCase {
-    override suspend fun invoke(id: Int): Result<Unit> {
+    override suspend fun invoke(id: String): Result<Unit> {
         return try {
             contactLocalRepository.deleteContactById(id)
             Result.success(Unit)

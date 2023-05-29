@@ -15,7 +15,7 @@ class ContactLocalRepository @Inject constructor(private val contactDao: Contact
     suspend fun getContactsByPage(page: Int): Flow<List<ContactLocal>> = contactDao.getByPage(page)
 
 
-    suspend fun deleteContactById(id: Int) = contactDao.deleteById(id)
+    suspend fun deleteContactById(id: String) = contactDao.deleteById(id)
 
     suspend fun clearAll() = contactDao.deleteAll()
 
