@@ -25,8 +25,6 @@ The application was built following these instructions:
 Checks for local data existence:
 - If available, display data from Room
 - If not available, make a network request and then store the data in Room for future use
-  
-# Exclusive XML Version Features
 
 - Delete a contact by swiping left on the item (the contact is deleted only from Room as remote deletion is not possible)
 - Refresh data by pulling the list down, this action clears Room and resynchronizes the first page's data with the remote data (deleted contacts reappear)
